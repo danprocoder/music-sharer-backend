@@ -1,0 +1,27 @@
+{
+  "name": "music-sharer",
+  "version": "1.0.0",
+  "description": "An app that allows users to share their songs with other users on the platform",
+  "main": "server.js",
+  "scripts": {
+    "test": "npm test",
+    "start": "nodemon --exec babel-node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/danprocoder/music-sharer-backend.git"
+  },
+  "author": "Daniel Austin",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/danprocoder/music-sharer-backend/issues"
+  },
+  "homepage": "https://github.com/danprocoder/music-sharer-backend#readme",
+  "dependencies": {
+    "@babel/core": "^7.2.2",
+    "@babel/node": "^7.2.2",
+    "@babel/preset-env": "^7.3.1",
+    "express": "^4.16.4",
+    "nodemon": "^1.18.10"
+  }
+}
