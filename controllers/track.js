@@ -3,6 +3,7 @@ import response from '../helpers/response';
 import { IncomingForm } from 'formidable';
 import fetch from 'node-fetch';
 import fs from 'fs';
+import path from 'path';
 
 require('dotenv').config();
 
@@ -18,7 +19,7 @@ export default class {
     Tracks.findAll({
       where,
       include: [User],
-      attributes: ['id', 'title', 'key', 'createdAt'],
+      attributes: ['id', 'title', 'key', 'url', 'createdAt'],
     })
       .then((data) => {
         response(res).success(data);
@@ -26,6 +27,8 @@ export default class {
   }
 
   upload(req, res) {
+    const controller = this;
+
     new Promise((resolve, reject) => {
       const form = new IncomingForm();
       form.parse(req, (err, field, file) => {
@@ -48,7 +51,8 @@ export default class {
           .then((data) => {
             resolve({
               title: field.title,
-              key: data.tonart_result.key.replace(':', '')
+              key: data.tonart_result.key.replace(':', ''),
+              file
             });
           })
           .catch(err => {
@@ -56,15 +60,39 @@ export default class {
           });
       });
     }).then((data) => {
+      // Save the uploaded file
+      return new Promise((resolve, reject) => {
+        const uploadPath = path.join(__dirname, '..', 'uploads'),
+              filename = controller.generateFilename(req.user, data);
+
+        if (!fs.existsSync(uploadPath)) {
+          fs.mkdirSync(uploadPath);
+        }
+        
+        fs.rename(data.file.path, path.join(uploadPath, filename), (err) => {
+          if (err) {
+            reject(err);
+          }
+
+          data.url = filename;
+          delete data.file;
+          
+          resolve(data);
+        });
+      });
+    }).then((data) => {
+      // Save to database.
       return Tracks.create({
         title: data.title,
         authorId: req.user.id,
         key: data.key,
+        url: data.url,
       }).then((track) => {
         return {
           id: track.id,
           title: track.title,
           key: track.key,
+          url: track.url,
         };
       });
     }).then((track) => {
@@ -72,6 +100,11 @@ export default class {
     }).catch((err) => {
       response(res).internalServerError(err);
     });
+  }
+
+  generateFilename(user, data) {
+    let filename = `${user.username}-`.concat(data.title.toLowerCase().replace(/ /g, '-'));
+    return filename;
   }
 
   sendFileToSonicAPI(req, res) {

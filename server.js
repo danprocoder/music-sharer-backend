@@ -9,8 +9,7 @@ app.use(
   bodyParser.json(),
   bodyParser.urlencoded({
     extended: true,
-  }),
-  bodyParser()
+  })
 );
 
 app.use(userRoutes);
