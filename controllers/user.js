@@ -55,11 +55,11 @@ export default class {
   userData(req, res) {
     const where = req.params.username ? (
       {
-        username: req.params.username.toLowerCase()
+        username: req.params.username.toLowerCase(),
       }
     ) : (
       {
-        id: 4, // Get from jwt
+        id: req.user.id, // Get from jwt
       }
     );
 
