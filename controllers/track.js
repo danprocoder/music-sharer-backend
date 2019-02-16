@@ -1,4 +1,4 @@
-import { Tracks } from '../models/index';
+import { Tracks, User } from '../models/index';
 import response from '../helpers/response';
 import { IncomingForm } from 'formidable';
 import fetch from 'node-fetch';
@@ -7,6 +7,24 @@ import fs from 'fs';
 require('dotenv').config();
 
 export default class {
+  getTracks(req, res) {
+    const where = req.params.username ? ({
+      '$User.username$': req.params.username,
+    }) : (null);
+
+    User.hasMany(Tracks, {foreignKey: 'id'});
+    Tracks.belongsTo(User, {foreignKey: 'authorId'});
+
+    Tracks.findAll({
+      where,
+      include: [User],
+      attributes: ['id', 'title', 'key', 'createdAt'],
+    })
+      .then((data) => {
+        response(res).success(data);
+      });
+  }
+
   upload(req, res) {
     new Promise((resolve, reject) => {
       const form = new IncomingForm();
