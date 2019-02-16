@@ -39,7 +39,12 @@ export default class {
       email: req.body.email,
       password: req.body.password,
     }).then((user) => {
-      response(res).success(user);
+      response(res).success({
+        user,
+        token: jwt.sign({
+          userId: user.id,
+        }, process.env.JWT_SECRET_KEY),
+      });
     });
   }
 
