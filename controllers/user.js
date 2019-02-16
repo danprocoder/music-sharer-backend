@@ -39,7 +39,12 @@ export default class {
       email: req.body.email,
       password: req.body.password,
     }).then((user) => {
-      response(res).success(user);
+      response(res).success({
+        user,
+        token: jwt.sign({
+          userId: user.id,
+        }, process.env.JWT_SECRET_KEY),
+      });
     });
   }
 
@@ -50,11 +55,11 @@ export default class {
   userData(req, res) {
     const where = req.params.username ? (
       {
-        username: req.params.username.toLowerCase()
+        username: req.params.username.toLowerCase(),
       }
     ) : (
       {
-        id: 4, // Get from jwt
+        id: req.user.id, // Get from jwt
       }
     );
 

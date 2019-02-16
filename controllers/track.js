@@ -58,7 +58,7 @@ export default class {
     }).then((data) => {
       return Tracks.create({
         title: data.title,
-        authorId: 1,
+        authorId: req.user.id,
         key: data.key,
       }).then((track) => {
         return {

@@ -14,6 +14,13 @@ export default (res) => {
       });
     },
 
+    forbidden() {
+      res.status(400).json({
+        status: 400,
+        message: 'Forbidden',
+      });
+    },
+
     internalServerError(message=null) {
       res.status(500).send({
         status: 500,
