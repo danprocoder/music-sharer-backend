@@ -12,6 +12,13 @@ export default (res) => {
         status: 404,
         message: data,
       });
+    },
+
+    internalServerError(message=null) {
+      res.status(500).send({
+        status: 500,
+        message: message || 'Internal Server Error',
+      });
     }
   }
 }
