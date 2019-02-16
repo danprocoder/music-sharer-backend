@@ -30,4 +30,26 @@ export default class {
       response(res).success(user);
     });
   }
+
+  userData(req, res) {
+    const where = req.params.username ? (
+      {
+        username: req.params.username.toLowerCase()
+      }
+    ) : (
+      {
+        id: 4, // Get from jwt
+      }
+    );
+
+    User.findOne({
+      where
+    }).then(data => {
+      if (data) {
+        response(res).success(data);
+      } else {
+        response(res).notFound('User not found');
+      }
+    });
+  }
 }
