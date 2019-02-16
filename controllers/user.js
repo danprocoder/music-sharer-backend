@@ -23,7 +23,11 @@ export default class {
   }
 
   addNewUser(req, res) {
+    const username = this.generateUsername(req.body.name);
+
     User.create({
+      name: req.body.name,
+      username,
       email: req.body.email,
       password: req.body.password,
     }).then((user) => {
@@ -31,6 +35,10 @@ export default class {
     });
   }
 
+  generateUsername(name) {
+    return name.toLowerCase().replace(/ /g, '-');
+  }
+  
   userData(req, res) {
     const where = req.params.username ? (
       {
