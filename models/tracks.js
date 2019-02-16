@@ -3,7 +3,7 @@ module.exports = (sequelize, DataTypes) => {
   const tracks = sequelize.define('Tracks', {
     title: DataTypes.STRING,
     key: DataTypes.STRING,
-    authorID: DataTypes.INTEGER,
+    authorId: DataTypes.INTEGER,
   }, {});
   tracks.associate = function(models) {
     // associations can be defined here
