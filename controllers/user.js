@@ -1,5 +1,8 @@
 import response from '../helpers/response';
 import { User } from '../models/index';
+import jwt from 'jsonwebtoken';
+
+require('dotenv').config();
 
 export default class {
   constructor() {
@@ -14,10 +17,15 @@ export default class {
       },
       attributes: ['id'],
     }).then((user) => {
-      if (user) {
-        response(res).success(user);
-      } else {
+      if (!user) {
         response(res).notFound('Email/password is incorrect');
+      } else {
+        response(res).success({
+          user,
+          token: jwt.sign({
+            userId: user.id,
+          }, process.env.JWT_SECRET_KEY),
+        });
       }
     });
   }
