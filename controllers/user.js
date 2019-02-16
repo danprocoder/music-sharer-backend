@@ -7,7 +7,19 @@ export default class {
   }
 
   auth(req, res) {
-    
+    User.findOne({
+      where: {
+        email: req.body.email.toLowerCase(),
+        password: req.body.password,
+      },
+      attributes: ['id'],
+    }).then((user) => {
+      if (user) {
+        response(res).success(user);
+      } else {
+        response(res).notFound('Email/password is incorrect');
+      }
+    });
   }
 
   addNewUser(req, res) {

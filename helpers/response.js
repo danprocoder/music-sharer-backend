@@ -8,7 +8,10 @@ export default (res) => {
     },
 
     notFound(data) {
-
+      res.status(404).json({
+        status: 404,
+        message: data,
+      });
     }
   }
 }
