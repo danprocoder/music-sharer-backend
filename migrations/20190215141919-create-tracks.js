@@ -18,7 +18,7 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       lengthStr: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       key: {
         type: Sequelize.STRING
