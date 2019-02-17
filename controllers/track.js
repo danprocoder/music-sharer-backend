@@ -1,6 +1,8 @@
 import { Tracks, User } from '../models/index';
 import response from '../helpers/response';
 import { IncomingForm } from 'formidable';
+import mp3Duration from 'mp3-duration';
+import time from '../helpers/time';
 import fetch from 'node-fetch';
 import fs from 'fs';
 import path from 'path';
@@ -19,7 +21,7 @@ export default class {
     Tracks.findAll({
       where,
       include: [User],
-      attributes: ['id', 'title', 'key', 'url', 'createdAt'],
+      attributes: ['id', 'title', 'key', 'url', 'views', 'likes', 'length', 'lengthStr', 'createdAt'],
     })
       .then((data) => {
         response(res).success(data);
@@ -52,14 +54,35 @@ export default class {
             resolve({
               title: field.title,
               key: data.tonart_result.key.replace(':', ''),
-              file
+              file,
             });
           })
           .catch(err => {
             resolve(null);
           });
       });
-    }).then((data) => {
+    })
+      .then((data) => {
+        // data.keys() => [title, key, file]
+
+        return new Promise((resolve, reject) => {
+          mp3Duration(data.file.path, (err, duration) => {
+            console.log(`Duration of file: ${duration}`);
+
+            if (err) {
+              duration = 0;
+            }
+
+            data.length = duration;
+            data.lengthStr = time.formatTime(duration);
+
+            resolve(data);
+          })
+        });
+      })
+      .then((data) => {
+      // data.keys() => [title, key, file, length, lengthStr]
+
       // Save the uploaded file
       return new Promise((resolve, reject) => {
         const uploadPath = path.join(__dirname, '..', 'uploads'),
@@ -87,6 +110,8 @@ export default class {
         authorId: req.user.id,
         key: data.key,
         url: data.url,
+        length: data.length,
+        lengthStr: data.lengthStr,
       }).then((track) => {
         return {
           id: track.id,
@@ -98,7 +123,8 @@ export default class {
     }).then((track) => {
       response(res).success(track);
     }).catch((err) => {
-      response(res).internalServerError(err);
+      console.error(err.message);
+      response(res).internalServerError(err.message);
     });
   }
 
@@ -109,5 +135,9 @@ export default class {
 
   sendFileToSonicAPI(req, res) {
     res.sendFile(req.params.filename);
+  }
+
+  sendStream(req, res) {
+    res.sendFile(path.join(__dirname, '..', 'uploads', decodeURIComponent(req.params.filename)));
   }
 }

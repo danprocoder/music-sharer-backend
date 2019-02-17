@@ -5,6 +5,8 @@ module.exports = (sequelize, DataTypes) => {
     key: DataTypes.STRING,
     authorId: DataTypes.INTEGER,
     url: DataTypes.STRING,
+    length: DataTypes.INTEGER,
+    lengthStr: DataTypes.STRING,
   }, {});
   tracks.associate = function(models) {
     // associations can be defined here
