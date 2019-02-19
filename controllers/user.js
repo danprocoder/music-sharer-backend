@@ -1,6 +1,7 @@
 import response from '../helpers/response';
 import { User } from '../models/index';
 import jwt from 'jsonwebtoken';
+import Validator from '../helpers/validator';
 
 require('dotenv').config();
 
@@ -31,13 +32,30 @@ export default class {
   }
 
   addNewUser(req, res) {
-    const username = this.generateUsername(req.body.name);
+    const { name, email, password } = req.body;
 
-    User.create({
-      name: req.body.name,
-      username,
-      email: req.body.email,
-      password: req.body.password,
+    new Validator({
+      name, email, password
+    }).run({
+      name: {
+        required: 'Name is required',
+      },
+      email: {
+        required: 'Email is required',
+        validEmail: 'Please provide a valid email',
+      },
+      password: {
+        required: 'Password is required',
+      }
+    }).then(() => {
+      const username = this.generateUsername(name);
+
+      return User.create({
+        name,
+        username,
+        email: email.toLowerCase(),
+        password: req.body.password,
+      });
     }).then((user) => {
       response(res).success({
         user,
@@ -45,6 +63,8 @@ export default class {
           userId: user.id,
         }, process.env.JWT_SECRET_KEY),
       });
+    }).catch((errors) => {
+      res.status(400).json(errors);
     });
   }
 
