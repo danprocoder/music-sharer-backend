@@ -34,15 +34,19 @@ export default class {
   addNewUser(req, res) {
     const { name, email, password } = req.body;
 
-    new Validator({
-      name, email, password
-    }).run({
+    const validator = new Validator({
+      name, email, password,
+    });
+    validator.defineRule('uniqueEmail', this.isEmailUnique);
+
+    validator.run({
       name: {
         required: 'Name is required',
       },
       email: {
         required: 'Email is required',
         validEmail: 'Please provide a valid email',
+        uniqueEmail: 'Email address already used. Choose another email',
       },
       password: {
         required: 'Password is required',
@@ -54,7 +58,7 @@ export default class {
         name,
         username,
         email: email.toLowerCase(),
-        password: req.body.password,
+        password,
       });
     }).then((user) => {
       response(res).success({
@@ -91,6 +95,16 @@ export default class {
       } else {
         response(res).notFound('User not found');
       }
+    });
+  }
+
+  isEmailUnique(email, callback) {
+    User.findOne({
+      where: {
+        email,
+      }
+    }).then((user) => {
+      callback(user == null);
     });
   }
 }
