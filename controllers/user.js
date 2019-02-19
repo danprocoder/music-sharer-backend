@@ -55,9 +55,9 @@ export default class {
       const username = this.generateUsername(name);
 
       return User.create({
-        name,
-        username,
-        email: email.toLowerCase(),
+        name: name.trim(),
+        username: username.trim(),
+        email: email.trim().toLowerCase(),
         password,
       });
     }).then((user) => {
