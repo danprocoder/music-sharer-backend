@@ -54,6 +54,21 @@ export default class {
       });
   }
 
+  getTrackDuration(data) {
+    return new Promise((resolve, reject) => {
+      mp3Duration(data.file.path, (err, duration) => {
+        if (err) {
+          duration = 0;
+        }
+
+        data.length = duration;
+        data.lengthStr = time.formatTime(duration);
+
+        resolve(data);
+      });
+    });
+  }
+
   upload(req, res) {
     const controller = this;
 
@@ -92,19 +107,7 @@ export default class {
       })
       .then((data) => {
         // Get the duration of the mp3 file.
-
-        return new Promise((resolve, reject) => {
-          mp3Duration(data.file.path, (err, duration) => {
-            if (err) {
-              duration = 0;
-            }
-
-            data.length = duration;
-            data.lengthStr = time.formatTime(duration);
-
-            resolve(data);
-          });
-        });
+        return this.getTrackDuration(data);
       })
       .then((data) => {
         // Save the uploaded file
