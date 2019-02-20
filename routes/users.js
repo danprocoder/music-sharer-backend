@@ -11,5 +11,6 @@ router.get('/api/user', authRequired, userController.userData.bind(userControlle
 router.get('/api/user/:username', userController.userData.bind(userController));
 router.patch('/api/user/bio', authRequired, userController.updateUserBio.bind(userController));
 router.patch('/api/user/photo', authRequired, userController.updateUserPhoto.bind(userController));
+router.get('/user/img/:filename', userController.sendUserPhoto.bind(userController));
 
 export default router;

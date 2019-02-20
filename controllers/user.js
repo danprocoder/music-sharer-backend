@@ -31,7 +31,7 @@ export default class {
           email,
           password,
         },
-        attributes: ['id', 'name', 'username'],
+        attributes: ['id', 'name', 'username', 'imgUrl'],
       });
     }).then((user) => {
       if (!user) {
@@ -209,5 +209,9 @@ export default class {
         }
       });
     });
+  }
+
+  sendUserPhoto(req, res) {
+    res.sendFile(path.join(__dirname, '..', 'uploads', 'profile-pictures', req.params.filename));
   }
 }
