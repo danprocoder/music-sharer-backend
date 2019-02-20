@@ -210,4 +210,8 @@ export default class {
       });
     });
   }
+
+  sendUserPhoto(req, res) {
+    res.sendFile(path.join(__dirname, '..', 'uploads', 'profile-pictures', req.params.filename));
+  }
 }
