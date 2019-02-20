@@ -10,5 +10,6 @@ router.post('/api/user/auth', userController.auth.bind(userController));
 router.get('/api/user', authRequired, userController.userData.bind(userController));
 router.get('/api/user/:username', userController.userData.bind(userController));
 router.patch('/api/user/bio', authRequired, userController.updateUserBio.bind(userController));
+router.patch('/api/user/photo', authRequired, userController.updateUserPhoto.bind(userController));
 
 export default router;

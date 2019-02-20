@@ -1,6 +1,9 @@
+import jwt from 'jsonwebtoken';
+import { IncomingForm } from 'formidable';
+import fs from 'fs';
+import path from 'path';
 import response from '../helpers/response';
 import { User } from '../models/index';
-import jwt from 'jsonwebtoken';
 import Validator from '../helpers/validator';
 
 require('dotenv').config();
@@ -129,8 +132,6 @@ export default class {
   updateUserBio(req, res) {
     const bio = req.body.bio;
 
-    console.log(bio);
-
     new Validator({
       bio,
     }).run({
@@ -152,6 +153,61 @@ export default class {
     }).catch((error) => {
       response(res).badRequest(error);
       throw error;
+    });
+  }
+
+  /**
+   * Updates the user profile picture.
+   * Called by PATCH /api/user/photo
+   */
+  updateUserPhoto(req, res) {
+    new Promise((resolve, reject) => {
+      // Parse the form
+      const form = new IncomingForm();
+      form.parse(req, (err, field, file) => {
+        if (file.photo) {
+          resolve(file.photo);
+        } else {
+          reject();
+        }
+      });
+    }).then((file) => {
+      // Save uploaded picture file to the server
+      return this.saveUserPhoto(file, req);
+    }).then((imgUrl) => {
+      // Save img filename to database.
+      return User.update({
+        imgUrl,
+      }, {
+        where: {
+          id: req.user.id,
+        },
+      }).then(() => imgUrl);
+    }).then((imgUrl) => {
+      // return imgUrl to client.
+      response(res).success({
+        imgUrl,
+      });
+    }).catch(() => {
+      response(res).badRequest();
+    });
+  }
+
+  saveUserPhoto(file, req) {
+    // Save the file with a random name.
+
+    const uploadPath = path.join(__dirname, '..', 'uploads', 'profile-pictures');
+    fs.mkdirSync(uploadPath, { recursive: true });
+
+    return new Promise((resolve, reject) => {
+      const { username } = req.user;
+      fs.rename(file.path, path.join(uploadPath, username), (err) => {
+        if (!err) {
+          resolve(username);
+        } else {
+          reject();
+        }
+      });
     });
   }
 }
