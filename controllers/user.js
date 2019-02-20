@@ -11,12 +11,25 @@ export default class {
   }
 
   auth(req, res) {
-    User.findOne({
-      where: {
-        email: req.body.email.toLowerCase(),
-        password: req.body.password,
+    const { email, password } = req.body;
+
+    new Validator({
+      email, password,
+    }).run({
+      email: {
+        required: 'Email is required',
       },
-      attributes: ['id'],
+      password: {
+        required: 'Password is required',
+      },
+    }).then(() => {
+      return User.findOne({
+        where: {
+          email,
+          password,
+        },
+        attributes: ['id', 'name', 'username'],
+      });
     }).then((user) => {
       if (!user) {
         response(res).notFound('Email/password is incorrect');
@@ -28,6 +41,8 @@ export default class {
           }, process.env.JWT_SECRET_KEY),
         });
       }
+    }).catch((error) => {
+      response(res).badRequest(error);
     });
   }
 
