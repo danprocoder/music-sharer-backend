@@ -122,4 +122,36 @@ export default class {
       callback(user == null);
     });
   }
+
+  /**
+   * Controller called from PATCH /api/user/bio
+   */
+  updateUserBio(req, res) {
+    const bio = req.body.bio;
+
+    console.log(bio);
+
+    new Validator({
+      bio,
+    }).run({
+      bio: {
+        required: 'User bio is required',
+      },
+    }).then(() => {
+      return User.update({
+        about: bio.trim(),
+      }, {
+        where: {
+          id: req.user.id,
+        },
+      });
+    }).then((user) => {
+      response(res).success({
+        bio: bio.trim(),
+      });
+    }).catch((error) => {
+      response(res).badRequest(error);
+      throw error;
+    });
+  }
 }
