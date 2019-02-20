@@ -33,9 +33,9 @@ export default class {
    * Connect to Sonic API to analyse the track.
    * https://api.sonicAPI.com/analyze/key
    * 
-   * @param {*} data 
+   * @param {object} data
    */
-  analyzeTrack(data) {
+  getTrackKey(data) {
     return fetch(`http://${process.env.BASE_URL}/get/key`, {
       method: 'POST',
       headers: {
@@ -88,7 +88,7 @@ export default class {
       })
       .then((data) => {
         // Analyse the track online to get the key.
-        return this.analyzeTrack(data);
+        return this.getTrackKey(data);
       })
       .then((data) => {
         // Get the duration of the mp3 file.
