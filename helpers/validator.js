@@ -10,10 +10,6 @@ import user from "../controllers/user";
 class Validator {
   ruleFunctions = {
       required(val, callback) {
-        if (typeof val === 'string') {
-          val = val.trim();
-        }
-
         callback(val != '' && val != null);
       },
 
