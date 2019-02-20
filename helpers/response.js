@@ -26,6 +26,13 @@ export default (res) => {
         status: 500,
         message: message || 'Internal Server Error',
       });
-    }
+    },
+
+    badRequest(error) {
+      res.status(400).send({
+        status: 400,
+        message: error,
+      });
+    },
   }
 }

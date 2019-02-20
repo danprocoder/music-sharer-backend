@@ -1,6 +1,7 @@
 import response from '../helpers/response';
 import { User } from '../models/index';
 import jwt from 'jsonwebtoken';
+import Validator from '../helpers/validator';
 
 require('dotenv').config();
 
@@ -10,12 +11,25 @@ export default class {
   }
 
   auth(req, res) {
-    User.findOne({
-      where: {
-        email: req.body.email.toLowerCase(),
-        password: req.body.password,
+    const { email, password } = req.body;
+
+    new Validator({
+      email, password,
+    }).run({
+      email: {
+        required: 'Email is required',
       },
-      attributes: ['id'],
+      password: {
+        required: 'Password is required',
+      },
+    }).then(() => {
+      return User.findOne({
+        where: {
+          email,
+          password,
+        },
+        attributes: ['id', 'name', 'username'],
+      });
     }).then((user) => {
       if (!user) {
         response(res).notFound('Email/password is incorrect');
@@ -27,17 +41,40 @@ export default class {
           }, process.env.JWT_SECRET_KEY),
         });
       }
+    }).catch((error) => {
+      response(res).badRequest(error);
     });
   }
 
   addNewUser(req, res) {
-    const username = this.generateUsername(req.body.name);
+    const { name, email, password } = req.body;
 
-    User.create({
-      name: req.body.name,
-      username,
-      email: req.body.email,
-      password: req.body.password,
+    const validator = new Validator({
+      name, email, password,
+    });
+    validator.defineRule('uniqueEmail', this.isEmailUnique);
+
+    validator.run({
+      name: {
+        required: 'Name is required',
+      },
+      email: {
+        required: 'Email is required',
+        validEmail: 'Please provide a valid email',
+        uniqueEmail: 'Email address already used. Choose another email',
+      },
+      password: {
+        required: 'Password is required',
+      }
+    }).then(() => {
+      const username = this.generateUsername(name);
+
+      return User.create({
+        name: name.trim(),
+        username: username.trim(),
+        email: email.trim().toLowerCase(),
+        password,
+      });
     }).then((user) => {
       response(res).success({
         user,
@@ -45,6 +82,8 @@ export default class {
           userId: user.id,
         }, process.env.JWT_SECRET_KEY),
       });
+    }).catch((errors) => {
+      res.status(400).json(errors);
     });
   }
 
@@ -71,6 +110,16 @@ export default class {
       } else {
         response(res).notFound('User not found');
       }
+    });
+  }
+
+  isEmailUnique(email, callback) {
+    User.findOne({
+      where: {
+        email,
+      }
+    }).then((user) => {
+      callback(user == null);
     });
   }
 }
