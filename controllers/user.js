@@ -31,7 +31,7 @@ export default class {
           email,
           password,
         },
-        attributes: ['id', 'name', 'username'],
+        attributes: ['id', 'name', 'username', 'imgUrl'],
       });
     }).then((user) => {
       if (!user) {
